@@ -66,7 +66,7 @@ class Sesion extends CI_Controller {
                         //$this->logs($accion='sesion-inicio');
                         $indicador=  strtoupper($user);
                         echo "<script>alert('Bienvenido $indicador')</script>";
-                        redirect('/plan', 'refresh');
+                        redirect('/guardiapcp/eventos', 'refresh');
                     }
                 }else{
                     echo "<script>alert('Indicador NO Registrado en el Sistema')</script>";

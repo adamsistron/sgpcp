@@ -383,8 +383,10 @@ function validarFormulario(frm){
                 <td>
                     <?php 
                         $ubi=$this->session->userdata('ubicacion');
-                        $attr='id="ubicacion" class="complet event2" data-check="ubicacion" disabled="true"';
-                        echo form_dropdown('ubicacion', $ubicacion, $ubi,$attr);
+                        //$attr='id="ubicacion" class="complet event2" data-check="ubicacion" disabled="true"';
+                        //echo form_dropdown('ubicacion', $ubicacion, $ubi,$attr);
+                        $attr='id="ubicacion" class="complet event2" data-check="ubicacion"';
+                        echo form_dropdown('ubicacion', $ubicacion, '0',$attr);
                     ?>
                 </td>
                 <td>
