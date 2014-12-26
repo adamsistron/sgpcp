@@ -16,7 +16,7 @@
                         <a href="<?php echo site_url('guardiapcp/objetivos_estrategicos')?>" class="Contenedor-Texto-sub-Menu" ><span class="Text-menu"> Objetivos Estratégicos</span></a>                        
                         <a href="<?php echo site_url('guardiapcp/usuarios')?>" class="Contenedor-Texto-sub-Menu" ><span class="Text-menu"> Usuarios </span></a>                        
     <span class="PuntoHo_Cortico"></span>
-                <a href="<?php echo site_url('sesion/logout')?>" class="Contenedor-Texto-Menu"><span class="Text-menu" > Salir(<?php echo strtoupper($this->session->userdata('indicador'));?>) </span></a>
+                <a href="<?php echo site_url('sesion/logout')?>" class="Contenedor-Texto-Menu"><span class="Text-menu" > Salir(<?php echo strtoupper($this->session->userdata('indicador_usuario'));?>) </span></a>
     <span class="PuntoHo_Cortico"></span>
              
 

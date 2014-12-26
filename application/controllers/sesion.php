@@ -43,17 +43,17 @@ class Sesion extends CI_Controller {
         
                 $auth_pdvsa=$this->auth_pdvsa($user,$pssw);
                 
-                $query_usuario = $this->db->get_where('to001_usuarios', array('to001_indicador' => $user));
+                $query_usuario = $this->db->get_where('usuario', array('indicador_usuario' => $user));
 
                 if ($query_usuario->num_rows() > 0)
                 {
                    $row = $query_usuario->row();
 
                    $newdata = array(
-                   'id_usuario'  => $row->to001_usuario_id,
-                   'indicador'  => $row->to001_indicador,
-                   'ubicacion'  => $row->to001_fk_tm008_ubic_id,
-                   'rol'  => $row->to001_rol,
+                   'id_usuario'  => $row->id_usuario,
+                   'indicador_usuario'  => $row->indicador_usuario,
+                   'nombre_usuario'  => $row->nombre_usuario,
+                   'id_rol'  => $row->id_rol,
                    'logged_in' => TRUE
                     );
                     

@@ -15,25 +15,16 @@ class Guardiapcp extends CI_Controller {
 	public function _example_output($output = null)
 	{
 		
-            //echo "eee";die();
-            //print_r($output);die();
-            $session_id = $this->session->userdata('indicador');
+            $this->load->view('main-aplicacion.php',$output);
+            /*
+            $session_id = $this->session->userdata('indicador_usuario');
             if($session_id<>''){
                 $this->load->view('main-aplicacion.php',$output);
             }else{
                 redirect('/', 'refresh');
             }
-            
-            
+*/            
             //$this->load->view('example',$output);
-	}
-
-
-	public function offices()
-	{
-		$output = $this->grocery_crud->render();
-
-		$this->_example_output($output);
 	}
 
 	public function index()
@@ -154,12 +145,13 @@ class Guardiapcp extends CI_Controller {
                         $crud->set_relation('id_division','division','descripcion_division'); 	 
                         $crud->set_relation('id_distrito','distrito','descripcion_distrito'); 
                         $crud->set_relation('id_tipo','tipos_eventos','descripcion_tipo'); 
+                        $crud->field_type('indicador_usuario','invisible');
 
                         $crud->set_field_upload('file_url','assets/uploads/files');
                         
 			$crud->required_fields('id_rfn','id_division','id_distrito','id_tipo','descripcion_evento','accion_realizada', 'impacto_operacional', 'descripcion_impacto', 'fecha_evento');
                         
-                        $crud->fields('fecha_evento','id_rfn','id_division','id_distrito','id_tipo','descripcion_evento','accion_realizada', 'impacto_operacional', 'descripcion_impacto', 'file_url');
+                        $crud->fields('indicador_usuario','fecha_evento','id_rfn','id_division','id_distrito','id_tipo','descripcion_evento','accion_realizada', 'impacto_operacional', 'descripcion_impacto', 'file_url');
                         
                         $crud->display_as('id_rfn','Región/Filial/Negocio');
                         $crud->display_as('id_division','División');
@@ -172,6 +164,25 @@ class Guardiapcp extends CI_Controller {
                         $crud->display_as('fecha_evento','Fecha del Evento');
                         $crud->display_as('file_url','Adjuntar archivo gif|jpeg|jpg|png');
                         
+                        $id_rol = $this->session->userdata('id_rol');
+                        $indicador_usuario = $this->session->userdata('indicador_usuario');
+                        
+                        if($id_rol==1){
+                            $crud->unset_delete();
+                        }
+                        if($id_rol==2){
+                            $crud->unset_delete();
+                            $crud->where('`eventos`.indicador_usuario',$indicador_usuario);
+                        }
+                        if($id_rol==3){
+                            $crud->unset_delete();
+                            
+                        }
+
+                        $crud->callback_before_insert($this->logs($accion='evento-insert'));
+                        $crud->callback_before_update($this->logs($accion='evento-update'));
+                        $crud->callback_before_delete($this->logs($accion='evento-delete'));
+
                         
 			//$crud->columns('city','country','phone','addressLine1','postalCode');
 
@@ -192,13 +203,33 @@ class Guardiapcp extends CI_Controller {
 
                         $crud->set_relation('id_rfn','rfn','descripcion_rfn');
                         $crud->set_relation('id_objetivo','objetivos_estrategicos','descripcion_objetivo');
+                        $crud->field_type('indicador_usuario','invisible');
                         
-                        $crud->fields('fecha_logro','id_rfn','descripcion_logro','id_objetivo', 'valor_agregado');                                              
+                        $crud->fields('indicador_usuario','fecha_logro','id_rfn','descripcion_logro','id_objetivo', 'valor_agregado');                                              
                         $crud->display_as('id_rfn','Región/Filial/Negocio');
                         $crud->display_as('fecha_logro','Fecha');
                         $crud->display_as('descripcion_logro','Descripción del Logro');                                              
                         $crud->display_as('id_objetivo','Objetivo Estratégico');                        
-                        $crud->display_as('valor_agregado','Valor Agregado');                       
+                        $crud->display_as('valor_agregado','Valor Agregado');  
+                        
+                        $id_rol = $this->session->userdata('id_rol');
+                        $indicador_usuario = $this->session->userdata('indicador_usuario');
+                        
+                        if($id_rol==1){
+                            $crud->unset_delete();
+                        }
+                        if($id_rol==2){
+                            $crud->unset_delete();
+                            $crud->where('`eventos`.indicador_usuario',$indicador_usuario);
+                        }
+                        if($id_rol==3){
+                            $crud->unset_delete();
+                            
+                        }
+
+                        $crud->callback_before_insert($this->logs($accion='logro-insert'));
+                        $crud->callback_before_update($this->logs($accion='logro-update'));
+                        $crud->callback_before_delete($this->logs($accion='logro-delete'));
                         
 			$output = $crud->render();
 
@@ -208,7 +239,13 @@ class Guardiapcp extends CI_Controller {
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
 	}
-	public function offices_management()
+        public function logs($accion='a'){
+
+                    $data = $this->session->all_userdata();
+                    $data['accion'] = $accion;
+                    $this->db->insert('logs', $data); 
+        }
+	/*public function offices_management()
 	{
 		try{
 			$crud = new grocery_CRUD();
@@ -317,7 +354,7 @@ class Guardiapcp extends CI_Controller {
 		}catch(Exception $e){
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
-	}
+	}*/
 	public function usuarios()
 	{
 		try{
@@ -326,11 +363,11 @@ class Guardiapcp extends CI_Controller {
 			$crud->set_language("spanish");
 
 			//$crud->set_theme('datatables');
-			$crud->set_table('to001_usuarios');
+			$crud->set_table('usuario');
 			$crud->set_subject('USUARIOS');
 			//$crud->required_fields('city');
 			//$crud->columns('city','country','phone','addressLine1','postalCode');
-			//$crud->set_relation('to001_fk_tm008_ubic_id','tm008_ubicacion','tm008_descripcion');
+			$crud->set_relation('id_rol','roles','nombre_rol');
 			//$crud->display_as('to001_indicador','Indicador')->display_as('to001_fk_tm008_ubic_id','Regi&oacute;n/Negocio/Filial')->display_as('to001_rol','Rol');
 
 			$output = $crud->render();
@@ -341,7 +378,30 @@ class Guardiapcp extends CI_Controller {
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
 	}
-	public function objetivospp()
+        public function roles_management()
+	{
+		try{
+			$crud = new grocery_CRUD();
+
+			//$crud->set_theme('datatables');
+			$crud->set_table('roles');
+                        $crud->fields('nombre_rol', 'descripcion_rol');
+			/*$crud->set_subject('Usuarios');
+			$crud->required_fields('nombre_usuario','indicador_usuario');
+			$crud->fields('nombre_usuario', 'indicador_usuario','rol_sistema_usuario','rol_incidente_usuario');
+                         
+                         */
+			//$crud->field_type('nombre_usuario', 'colocar_tipo de campo');
+
+			$output = $crud->render();
+
+			$this->_example_output($output);
+
+		}catch(Exception $e){
+			show_error($e->getMessage().' --- '.$e->getTraceAsString());
+		}
+	}
+	/*public function objetivospp()
 	{
 		try{
 			$crud = new grocery_CRUD();
@@ -646,6 +706,6 @@ class Guardiapcp extends CI_Controller {
 		} else {
 			return $output;
 		}
-	}
+	}*/
 
 }
