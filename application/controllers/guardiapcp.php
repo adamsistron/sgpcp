@@ -176,7 +176,6 @@ class Guardiapcp extends CI_Controller {
                         }
                         if($id_rol==3){
                             $crud->unset_delete();
-                            
                         }
 
                         $crud->callback_before_insert($this->logs($accion='evento-insert'));
