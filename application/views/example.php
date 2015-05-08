@@ -2,8 +2,6 @@
 <html>
 <head>
 	<meta charset="utf-8" />
-        <title>SSPO | Sistema para el Seguimiento del Plan Operativo</title>
-        <link rel="shortcut icon" href="<?php echo base_url('images/pdvsa.ico');?>" />
 <?php 
 foreach($css_files as $file): ?>
 	<link type="text/css" rel="stylesheet" href="<?php echo $file; ?>" />
@@ -16,7 +14,6 @@ body
 {
 	font-family: Arial;
 	font-size: 14px;
-        background: linear-gradient(#FFF ,#DDD );
 }
 a {
     color: blue;
@@ -25,32 +22,21 @@ a {
 }
 a:hover
 {
-     text-decoration: underline;
+	text-decoration: underline;
 }
 </style>
 </head>
 <body>
 	<div>
-		<a href='<?php echo site_url('maestros/ubicacion')?>'>Regi&oacute;n / Negocio / Filial</a> |
-		<a href='<?php echo site_url('maestros/usuarios')?>'>Usuarios</a> |
-		<a href='<?php echo site_url('maestros/objetivospp')?>'>Objetivos del Plan de la Patria</a> |
-		<a href='<?php echo site_url('maestros/lineas_accion')?>'>Lineas de Acci&oacute;n</a> |
-		<a href='<?php echo site_url('maestros/actividades')?>'>Actividades</a> | 
-		<a href='<?php echo site_url('maestros/tareas')?>'>Tareas</a> |		 
-		<a href='<?php echo site_url('maestros/unidad_medida')?>'>Unidad de Medida</a> | 
-		<a href='<?php echo site_url('maestros/dominio')?>'>Dominio</a> |
-		<a href='<?php echo site_url('maestros/objetivoscc')?>'>Objetivo de Control</a>|
-		<a href='<?php echo site_url('maestros/control')?>'>Control ISO 27002</a>
-		
+		<a href='<?php echo site_url('images_examples/example1')?>'>Example 1 - Simple</a> |
+		<a href='<?php echo site_url('images_examples/example2')?>'>Example 2 - Ordering</a> |
+		<a href='<?php echo site_url('images_examples/example3/22')?>'>Example 3 - With group id</a> |
+		<a href='<?php echo site_url('images_examples/example4')?>'>Example 4 - Images with title</a> | 
+		<a href='<?php echo site_url('images_examples/simple_photo_gallery')?>'>Simple Photo Gallery</a>
 	</div>
 	<div style='height:20px;'></div>  
-        <?php //$this->load->view('menu_vertical');?>
-    <center>
-        <div style="width: 90%;">
-            <?php echo $output; ?>
-            
-        </div>
-    </center>
-
+    <div>
+		<?php echo $output; ?>
+    </div>
 </body>
 </html>
