@@ -1,12 +1,12 @@
 <div class="Contenedor-Editable" id="Menu">
-    <p style="margin: 0.05em; font-size: 8;margin-left: 1em; font-family: Arial; font-weight: bold; color: #A19B9E ">MENÚ</p>
+    <p style="margin: 0.05em; font-size: 8;margin-left: 1em; font-family: Arial; font-weight: bold; color: #A19B9E ">Opciones</p>
     <span class="PuntoHo_Cortico"></span>
 
                <a href="#" class="Contenedor-Texto-Menu"><span class="Text-menu" > Registro de Novedades </span></a>
                 <span class="PuntoHo_Cortico"></span>
                         <!--a href="<?php echo site_url('guardiapcp/eventos')?>" class="Contenedor-Texto-sub-Menu" ><span class="Text-menu"> Eventos No deseados </span></a-->
                         <!--a href="<?php echo site_url('guardiapcp/logros')?>" class="Contenedor-Texto-sub-Menu" ><span class="Text-menu"> Logros/Aspectos Positivos </span></a-->
-                        <a href="<?php echo site_url('guardiapcp/imagenes_eventos')?>" class="Contenedor-Texto-sub-Menu" ><span class="Text-menu"> Registro de Eventos No Deseados </span></a>
+                        <a href="<?php echo site_url('guardiapcp/imagenes_eventos')?>" class="Contenedor-Texto-sub-Menu" ><span class="Text-menu"> Registro de Eventos Relevantes </span></a>
                         <!--a href="<?php echo site_url('multiuploader/index')?>" class="Contenedor-Texto-sub-Menu" ><span class="Text-menu"> Example Multi Uploader </span></a-->
 <span class="PuntoHo_Cortico"></span>
                         <a href="#" class="Contenedor-Texto-Menu"><span class="Text-menu" > Datos Maestros </span></a>

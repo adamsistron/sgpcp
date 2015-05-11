@@ -48,7 +48,6 @@
 $active_group = 'default';
 $active_record = TRUE;
 
-//$db['default']['hostname'] = 'localhost';
 $db['default']['hostname'] = '167.134.200.166';
 $db['default']['username'] = 'root';
 $db['default']['password'] = '12qwaszx';
@@ -64,6 +63,23 @@ $db['default']['dbcollat'] = 'utf8_general_ci';
 $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
+
+
+$db['dependent']['hostname'] = '167.134.200.166';
+$db['dependent']['username'] = 'root';
+$db['dependent']['password'] = '12qwaszx';
+$db['dependent']['database'] = 'dependent';
+$db['dependent']['dbdriver'] = 'mysql';
+$db['dependent']['dbprefix'] = '';
+$db['dependent']['pconnect'] = TRUE;
+$db['dependent']['db_debug'] = TRUE;
+$db['dependent']['cache_on'] = FALSE;
+$db['dependent']['cachedir'] = '';
+$db['dependent']['char_set'] = 'utf8';
+$db['dependent']['dbcollat'] = 'utf8_general_ci';
+$db['dependent']['swap_pre'] = '';
+$db['dependent']['autoinit'] = TRUE;
+$db['dependent']['stricton'] = FALSE;
 
 
 /* End of file database.php */
