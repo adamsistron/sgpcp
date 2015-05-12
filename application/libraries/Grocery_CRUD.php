@@ -1487,7 +1487,7 @@ class grocery_CRUD_Layout extends grocery_CRUD_Model_Driver
 	private $views_as_string			= '';
 	private $echo_and_die				= false;
 	protected $theme 					= null;
-	protected $default_true_false_text 	= array('inactive' , 'active');
+	protected $default_true_false_text 	= array('No' , 'Si');
 
 	protected $css_files				= array();
 	protected $js_files					= array();
