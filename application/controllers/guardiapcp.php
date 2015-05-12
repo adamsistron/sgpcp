@@ -368,7 +368,7 @@ class Guardiapcp extends CI_Controller {
         $crud->field_type('aprobacion_nacional', 'true_false', array('No', 'Si'));
         
         //if($id_rol==3){
-            $col = array('fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'descripcion_evento','accion_realizada', 'indicador_usuario', 'file');	
+            $col = array('fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file');	
             $crud->fields($col);
             $crud->columns($col);
             
