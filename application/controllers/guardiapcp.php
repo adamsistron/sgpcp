@@ -45,7 +45,7 @@ class Guardiapcp extends CI_Controller {
 
 			//$crud->set_theme('datatables');
 			$crud->set_table('rfn');
-			$crud->set_subject('REGIÓN/FILIAL/NEGOCIO');
+			$crud->set_subject('Negocio/Filial');
                         //$crud->set_relation('id_rfn','rfn','descripcion_rfn');
 			//$crud->required_fields('city');
 			//$crud->columns('city','country','phone','addressLine1','postalCode');
@@ -93,23 +93,47 @@ class Guardiapcp extends CI_Controller {
 			$crud->set_subject('Sub-División 2');
                         
                         $crud->set_relation('id_rfn','rfn','descripcion_rfn');
-			$crud->set_relation('id_division','division','{descripcion_division}-{s_id_rfn}');
+			$crud->set_relation('id_division','division','{descripcion_division}');
                         //
-			$crud->display_as('descripcion_distrito','Nombre Sub-Division 2');
+			$crud->display_as('descripcion_distrito','Sub-Division 2');
 			$crud->display_as('id_division','Sub-Division 1');
 			$crud->display_as('id_rfn','Negocio/Filial');
 			$crud->fields('id_rfn','id_division','descripcion_distrito');
-			
+                        $crud->columns('id_rfn','id_division','descripcion_distrito');
+
                         
-			$output = $crud->render();
                         
+                        $crud->callback_add_field('id_division', array($this, 'empty_subdivision1_dropdown_select'));
+                        $crud->callback_edit_field('id_division', array($this, 'empty_subdivision1_dropdown_select'));
+
+
+        $output = $crud->render();
+                        			
+			//DEPENDENT DROPDOWN SETUP
+			$dd_data = array(
+				//GET THE STATE OF THE CURRENT PAGE - E.G LIST | ADD
+				'dd_state' =>  $crud->getState(),
+				//SETUP YOUR DROPDOWNS
+				//Parent field item always listed first in array, in this case countryID
+				//Child field items need to follow in order, e.g stateID then cityID
+				'dd_dropdowns' => array('id_rfn','id_division'),
+				//SETUP URL POST FOR EACH CHILD
+				//List in order as per above
+				'dd_url' => array('', site_url().'guardiapcp/get_subdivision1/'),
+				//LOADER THAT GETS DISPLAYED NEXT TO THE PARENT DROPDOWN WHILE THE CHILD LOADS
+				'dd_ajax_loader' => base_url().'ajax-loader.gif'
+			);
+			$output->dropdown_setup = $dd_data;
 			
 			$this->_example_output($output);
+                        
 
 		}catch(Exception $e){
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
         }
+        
+        
         
         
         public function desviacion()
@@ -313,9 +337,6 @@ class Guardiapcp extends CI_Controller {
                     $data['accion'] = $accion;
                     $this->db->insert('logs', $data); 
         }
-        
-        
-        
         public function er()
         {
 	// No required if you have set timezone already... :)
@@ -338,19 +359,21 @@ class Guardiapcp extends CI_Controller {
         $crud->set_relation('id_desviacion','desviacion','nombre_desviacion '); 
         $crud->set_relation('id_evento','imagenes_eventos','url');
         //$crud->field_type('indicador_usuario','invisible');
-        $crud->required_fields('id_rfn','id_division','id_desviacion','id_tipo','descripcion_evento','accion_realizada', 'impacto_mediatico', 'impacto_operacional', 'descripcion_impacto', 'fecha_evento');
+        $crud->required_fields('id_rfn','id_division','id_desviacion','id_tipo','descripcion_evento','accion_realizada', 'impacto_mediatico', 'impacto_operacional','fecha_evento');
         $id_rol = $this->session->userdata('id_rol');
         //$indicador_usuario = $this->session->userdata('indicador_usuario');
         $crud->field_type('impacto_operacional', 'true_false', array('No', 'Si'));
         $crud->field_type('impacto_mediatico', 'true_false', array('No', 'Si'));
-        $crud->field_type('impacto_operacional', 'true_false', array('No', 'Si'));
         $crud->field_type('aprobacion_regional', 'true_false', array('No', 'Si'));
         $crud->field_type('aprobacion_nacional', 'true_false', array('No', 'Si'));
         
         //if($id_rol==3){
-            $col = array('indicador_usuario','fecha_evento','id_rfn','id_division','id_distrito','id_tipo','descripcion_evento','accion_realizada', 'impacto_operacional', 'descripcion_impacto','aprobacion_nacional','file');	
-            //$crud->fields($col);
-            //$crud->columns($col);
+            $col = array('fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'descripcion_evento','accion_realizada', 'indicador_usuario', 'file');	
+            $crud->fields($col);
+            $crud->columns($col);
+            
+            $crud->unset_fields('indicador_regional','indicador_nacional','aprobacion_nacional','aprobacion_regional');
+            $crud->unset_fields('indicador_regional','indicador_nacional','aprobacion_nacional','aprobacion_regional');
             $crud->display_as('id_rfn','Negocio/Filial');
             $crud->display_as('id_division','Sub-División 1');
             $crud->display_as('id_distrito','Sub-División 2');
@@ -400,6 +423,9 @@ class Guardiapcp extends CI_Controller {
         $crud->callback_edit_field('id_division', array($this, 'empty_subdivision1_dropdown_select'));
         $crud->callback_add_field('id_distrito', array($this, 'empty_subdivision2_dropdown_select'));
         $crud->callback_edit_field('id_distrito', array($this, 'empty_subdivision2_dropdown_select'));
+        
+        $crud->callback_add_field('id_tipo', array($this, 'empty_desviacion_evento_dropdown_select'));
+        $crud->callback_edit_field('id_tipo', array($this, 'empty_desviacion_evento_dropdown_select'));
 
         $output = $crud->render();
                         			
@@ -418,6 +444,21 @@ class Guardiapcp extends CI_Controller {
 				'dd_ajax_loader' => base_url().'ajax-loader.gif'
 			);
 			$output->dropdown_setup = $dd_data;
+			//DEPENDENT DROPDOWN SETUP
+			$dd_data_desviacion = array(
+				//GET THE STATE OF THE CURRENT PAGE - E.G LIST | ADD
+				'dd_state' =>  $crud->getState(),
+				//SETUP YOUR DROPDOWNS
+				//Parent field item always listed first in array, in this case countryID
+				//Child field items need to follow in order, e.g stateID then cityID
+				'dd_dropdowns' => array('id_desviacion','id_tipo'),
+				//SETUP URL POST FOR EACH CHILD
+				//List in order as per above
+				'dd_url' => array('', site_url().'guardiapcp/get_tipodesviacion/'),
+				//LOADER THAT GETS DISPLAYED NEXT TO THE PARENT DROPDOWN WHILE THE CHILD LOADS
+				'dd_ajax_loader' => base_url().'ajax-loader.gif'
+			);
+			$output->dropdown_setup_desviacion = $dd_data_desviacion;
 			
 			$this->_example_output($output);
 	
@@ -425,12 +466,77 @@ class Guardiapcp extends CI_Controller {
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		
 	}		
-		
 
     }
     
     /**/
     //CALLBACK FUNCTIONS
+	function empty_desviacion_evento_dropdown_select()
+	{
+		//CREATE THE EMPTY SELECT STRING
+		$empty_select = '<select name="id_tipo" class="chosen-select" data-placeholder="Select Tipo de Desviación" style="width: 300px; display: none;">';
+		$empty_select_closed = '</select>';
+		//GET THE ID OF THE LISTING USING URI
+		$listingID = $this->uri->segment(4);
+		
+		//LOAD GCRUD AND GET THE STATE
+		$crud = new grocery_CRUD();
+		$state = $crud->getState();
+		
+		//CHECK FOR A URI VALUE AND MAKE SURE ITS ON THE EDIT STATE
+		if(isset($listingID) && $state == "edit") {
+			//GET THE STORED STATE ID
+			$this->db->select('id_desviacion, id_tipo')
+					 ->from('eventos_3')
+					 ->where('id_evento', $listingID);
+			$db = $this->db->get();
+			$row = $db->row(0);
+			$countryID = $row->id_desviacion;
+			$stateID = $row->id_tipo;
+			
+			//GET THE STATES PER COUNTRY ID
+			$this->db->select('*')
+					 ->from('tipos_eventos')
+					 ->where('id_desviacion', $countryID);
+			$db = $this->db->get();
+			
+			//APPEND THE OPTION FIELDS WITH VALUES FROM THE STATES PER THE COUNTRY ID
+			foreach($db->result() as $row):
+				if($row->id_tipo == $stateID) {
+					$empty_select .= '<option value="'.$row->id_tipo.'" selected="selected">'.$row->descripcion_tipo.'</option>';
+				} else {
+					$empty_select .= '<option value="'.$row->id_tipo.'">'.$row->descripcion_tipo.'</option>';
+				}
+			endforeach;
+			
+			//RETURN SELECTION COMBO
+			return $empty_select.$empty_select_closed;
+		} else {
+			//RETURN SELECTION COMBO
+			return $empty_select.$empty_select_closed;	
+		}
+	}
+        
+        //GET JSON OF STATES
+	function get_tipodesviacion()
+	{
+		$countryID = $this->uri->segment(3);
+		//$countryID = 2;
+                
+		$this->db->select("*")
+				 ->from('tipos_eventos')
+				 ->where('id_desviacion', $countryID);
+		$db = $this->db->get();
+		
+		$array = array();
+		foreach($db->result() as $row):
+			$array[] = array("value" => $row->id_tipo, "property" => $row->descripcion_tipo);
+		endforeach;
+		
+		echo json_encode($array);
+		exit;
+	}
+        
 	function empty_subdivision1_dropdown_select()
 	{
 		//CREATE THE EMPTY SELECT STRING
