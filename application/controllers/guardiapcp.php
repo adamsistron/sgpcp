@@ -38,50 +38,6 @@ class Guardiapcp extends CI_Controller {
 		$this->_example_output((object)array('output' => '' , 'js_files' => array() , 'css_files' => array()));
 	}
         
-        public function validate_action($primary_key , $row)
-        {
-            //print_r($row);die();
-        //return site_url('guardiapcp/rfn/edit/').'/'.$row->id_rfn;
-        
-        $fecha_explode_a = explode('-',$row->fecha_registro);
-        $fecha_explode = explode('/',$fecha_explode_a[0]);
-        
-        //print_r($fecha_explode);die();
-        
-        $fecha_base = date('d/m/Y')." - 07:30";
-        $fecha_registro = $row->fecha_registro;
-        
-        $dia_base = date('d/m/Y');
-        $dia_registro = $fecha_explode[0].'/'.$fecha_explode[1].'/'.$fecha_explode[2];
-        
-        //echo "$dia_base - $dia_registro";die();
-        
-        if($fecha_registro < $fecha_base && $dia_registro == $dia_base){
-        
-        return site_url('guardiapcp/rfn/edit/').'/'.$row->id_rfn;
-
-        }else{
-            return "";
-        }
-        }
-        public function validate_action_edit($value, $row)
-        {
-            //Set Fecha de Hoy Condición 1
-            $fecha_hoy = date('Y-m-d');
-            
-            //Set Fecha Tope
-            $fecha = date('Y-m-j');
-            $fecha_tope = strtotime ( '+1 day' , strtotime ( $fecha ) ) ;
-            $fecha_tope = date ( 'Y-m-j' , $fecha_tope )." 07:30:00";
-
-        if($row->fecha_registro >= $fecha_hoy && $row->fecha_registro<=$fecha_tope){
-            return "<a title='Disponible para editar ".$row->fecha_registro."' href='".site_url('guardiapcp/er/edit').'/'.$row->id_evento."'>".$row->fecha_registro."</a>";
-        }else{
-            return $row->fecha_registro;
-        }
-
-        }
-
         public function rfn()
 	{
 		try{
@@ -243,7 +199,6 @@ class Guardiapcp extends CI_Controller {
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
         }
-        
         public function logros()
 	{
 		try{
@@ -295,6 +250,23 @@ class Guardiapcp extends CI_Controller {
                     $data['accion'] = $accion;
                     $this->db->insert('logs', $data); 
         }
+        public function validate_action_edit($value, $row)
+        {
+            //Set Fecha de Hoy Condición 1
+            $fecha_hoy = date('Y-m-d');
+            
+            //Set Fecha Tope
+            $fecha = date('Y-m-j');
+            $fecha_tope = strtotime ( '+1 day' , strtotime ( $fecha ) ) ;
+            $fecha_tope = date ( 'Y-m-j' , $fecha_tope )." 07:30:00";
+
+        if($row->fecha_registro >= $fecha_hoy && $row->fecha_registro<=$fecha_tope){
+            return "<a title='Disponible para EDITAR Hasta: ".$fecha_tope."' href='".site_url('guardiapcp/er/edit').'/'.$row->id_evento."'><b>".$row->fecha_registro."</b></a>";
+        }else{
+            return $row->fecha_registro;
+        }
+
+        }
         public function er()
         {
 	// No required if you have set timezone already... :)
@@ -311,7 +283,6 @@ class Guardiapcp extends CI_Controller {
         $indicador_usuario = $this->session->userdata('indicador_usuario');
         $crud->set_table('eventos_4');
 	$crud->set_subject('Evento Relevante');
-
         
         $crud->set_relation('id_rfn','rfn','descripcion_rfn');
         $crud->set_relation('id_division','division','descripcion_division'); 	 
@@ -352,40 +323,20 @@ class Guardiapcp extends CI_Controller {
             $crud->display_as('indicador_regional','Indicador de Aprobador Regional');
             $crud->display_as('indicador_nacional','Indicador de Aprobrador Nacional');
             
-            //$crud->add_action('Editar', 'http://www.grocerycrud.com/assets/uploads/general/smiley.png', '','',array($this,'validate_action'));
-            
             $crud->unset_export();
-//            
-//            $crud->unset_add();
-//            $crud->unset_edit();
-//            $crud->unset_delete();
-//            
             $crud->callback_column('fecha_registro',array($this,'validate_action_edit'));
             
-            /*if($crud->callback_column('fecha_registro',array($this,'validate_action_edit'))==true){
-                echo 1;die();
-            }else{
-                echo 2;die();
-            }*/
             $crud->order_by('fecha_registro','desc');
-            
                     
             if($id_rol==1){
-            //$crud->unset_operations();
-            $crud->where('`eventos_4`.indicador_usuario',$indicador_usuario);
-            /*
-            $crud->unset_add();
-            $crud->unset_edit();
-            $crud->unset_delete();
-            */                             
+                $crud->where('`eventos_4`.indicador_usuario',$indicador_usuario);
             }
             if($id_rol==2){
-            $crud->unset_delete();
-            $crud->where('`eventos_4`.indicador_usuario',$indicador_usuario);
+                $crud->unset_delete();
+                $crud->where('`eventos_4`.indicador_usuario',$indicador_usuario);
             }
             if($id_rol==3){
-            $crud->unset_delete();
-            
+                $crud->unset_delete();
             }
             
 
@@ -457,6 +408,16 @@ class Guardiapcp extends CI_Controller {
 				'dd_ajax_loader' => base_url().'ajax-loader.gif'
 			);
 			$output->dropdown_setup_desviacion = $dd_data_desviacion;
+                        $output->hide_action = "<script type='text/javascript'>
+                        $(function() {
+                        function hide_action(){
+                            $('.edit-icon').hide();
+                        }
+                            setInterval(hide_action, 50);
+                        });
+                        </script>";
+                        
+                        
 			
 			$this->_example_output($output);
 	
