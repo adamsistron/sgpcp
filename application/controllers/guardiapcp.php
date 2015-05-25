@@ -37,6 +37,50 @@ class Guardiapcp extends CI_Controller {
 	{
 		$this->_example_output((object)array('output' => '' , 'js_files' => array() , 'css_files' => array()));
 	}
+        
+        public function validate_action($primary_key , $row)
+        {
+            //print_r($row);die();
+        //return site_url('guardiapcp/rfn/edit/').'/'.$row->id_rfn;
+        
+        $fecha_explode_a = explode('-',$row->fecha_registro);
+        $fecha_explode = explode('/',$fecha_explode_a[0]);
+        
+        //print_r($fecha_explode);die();
+        
+        $fecha_base = date('d/m/Y')." - 07:30";
+        $fecha_registro = $row->fecha_registro;
+        
+        $dia_base = date('d/m/Y');
+        $dia_registro = $fecha_explode[0].'/'.$fecha_explode[1].'/'.$fecha_explode[2];
+        
+        //echo "$dia_base - $dia_registro";die();
+        
+        if($fecha_registro < $fecha_base && $dia_registro == $dia_base){
+        
+        return site_url('guardiapcp/rfn/edit/').'/'.$row->id_rfn;
+
+        }else{
+            return "";
+        }
+        }
+        public function validate_action_edit($value, $row)
+        {
+            //Set Fecha de Hoy Condición 1
+            $fecha_hoy = date('Y-m-d');
+            
+            //Set Fecha Tope
+            $fecha = date('Y-m-j');
+            $fecha_tope = strtotime ( '+1 day' , strtotime ( $fecha ) ) ;
+            $fecha_tope = date ( 'Y-m-j' , $fecha_tope )." 07:30:00";
+
+        if($row->fecha_registro >= $fecha_hoy && $row->fecha_registro<=$fecha_tope){
+            return "<a title='Disponible para editar ".$row->fecha_registro."' href='".site_url('guardiapcp/er/edit').'/'.$row->id_evento."'>".$row->fecha_registro."</a>";
+        }else{
+            return $row->fecha_registro;
+        }
+
+        }
 
         public function rfn()
 	{
@@ -49,6 +93,11 @@ class Guardiapcp extends CI_Controller {
                         //$crud->set_relation('id_rfn','rfn','descripcion_rfn');
 			//$crud->required_fields('city');
 			//$crud->columns('city','country','phone','addressLine1','postalCode');
+                        
+                        //$crud->callback_column('rfn',array($this,'validate_action_edit'));
+                        
+                        //$crud->add_action('Editar', 'http://www.grocerycrud.com/assets/uploads/general/smiley.png', '','',array($this,'validate_action'));
+                        //$crud->add_action('Smileys', 'http://www.grocerycrud.com/assets/uploads/general/smiley.png', "-");
 
 			$output = $crud->render();
 
@@ -81,7 +130,6 @@ class Guardiapcp extends CI_Controller {
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
         }
-        
         public function distrito()//Sub División 2
 	{
 		try{
@@ -132,10 +180,6 @@ class Guardiapcp extends CI_Controller {
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
         }
-        
-        
-        
-        
         public function desviacion()
 	{
 		try{
@@ -179,7 +223,6 @@ class Guardiapcp extends CI_Controller {
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
         }
-        
         public function objetivos_estrategicos()
 	{
 		try{
@@ -200,92 +243,7 @@ class Guardiapcp extends CI_Controller {
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
         }
-        public function eventos()
-	{
-		try{
-			$crud = new grocery_CRUD();
-
-			//$crud->set_theme('datatables');
-			$crud->set_table('eventos');
-			$crud->set_subject('Evento Relevante');
-                        $crud->set_relation('id_rfn','rfn','descripcion_rfn');
-                        $crud->set_relation('id_division','division','descripcion_division'); 	 
-                        $crud->set_relation('id_distrito','distrito','descripcion_distrito'); 
-                        $crud->set_relation('id_tipo','tipos_eventos','descripcion_tipo'); 
-                        $crud->field_type('indicador_usuario','invisible');
-
-                        $crud->set_field_upload('file_url','assets/uploads/files');
-                        
-			$crud->required_fields('id_rfn','id_division','id_distrito','id_tipo','descripcion_evento','accion_realizada', 'impacto_operacional', 'descripcion_impacto', 'fecha_evento');
-
-                        
-                        $id_rol = $this->session->userdata('id_rol');
-                        $indicador_usuario = $this->session->userdata('indicador_usuario');
-                        
-                        if($id_rol==1){
-                            $crud->unset_delete();
-                            $crud->unset_columns('aprobacion_regional','aprobacion_nacional','indicador_regional','indicador_nacional');
-                            $crud->fields('indicador_usuario','fecha_evento','id_rfn','id_division','id_distrito','id_tipo','descripcion_evento','accion_realizada', 'impacto_operacional', 'descripcion_impacto', 'file_url');                        
-                            $crud->display_as('id_rfn','Región/Filial/Negocio');
-                            $crud->display_as('id_division','Sub-División 1');
-                            $crud->display_as('id_distrito','Sub-División 2');
-                            $crud->display_as('id_tipo','Tipo de Evento');
-                            $crud->display_as('descripcion_evento','Descripción del Evento');
-                            $crud->display_as('accion_realizada','Acción Realizada');
-                            $crud->display_as('impacto_operacional','Impacto Operacional');
-                            $crud->display_as('descripcion_impacto','Descripción del Impacto Operacional');
-                            $crud->display_as('fecha_evento','Fecha del Evento');
-                            $crud->display_as('file_url','Adjuntar archivo gif | jpeg | jpg | png');
-                        }
-                        if($id_rol==2){
-                            $crud->unset_delete();
-                            $crud->where('`eventos`.indicador_usuario',$indicador_usuario);
-                            $crud->unset_columns('aprobacion_nacional','indicador_regional','indicador_nacional');
-                            $crud->fields('indicador_usuario','fecha_evento','id_rfn','id_division','id_distrito','id_tipo','descripcion_evento','accion_realizada', 'impacto_operacional', 'descripcion_impacto', 'file_url','aprobacion_regional');                        
-                            $crud->display_as('id_rfn','Región/Filial/Negocio');
-			    $crud->display_as('id_division','Sub-División 1');
-                            $crud->display_as('id_distrito','Sub-División 2');
-                            $crud->display_as('id_tipo','Tipo de Evento');
-                            $crud->display_as('accion_realizada','Acción Realizada');
-                            $crud->display_as('impacto_operacional','Impacto Operacional');
-                            $crud->display_as('descripcion_impacto','Descripción del Impacto Operacional');
-                            $crud->display_as('fecha_evento','Fecha del Evento');
-                            $crud->display_as('file_url','Adjuntar archivo gif | jpeg | jpg | png');
-                            $crud->display_as('aprobacion_regional','Aprobación');
-                        }
-                        if($id_rol==3){
-                            $crud->unset_delete();
-                            $crud->unset_columns('aprobacion_regional','indicador_regional','indicador_nacional');
-                            $crud->field_type('aprobacion_nacional','true_false');
-                            $crud->fields('indicador_usuario','fecha_evento','id_rfn','id_division','id_distrito','id_tipo','descripcion_evento','accion_realizada', 'impacto_operacional', 'descripcion_impacto', 'file_url','aprobacion_nacional');                        
-                            $crud->display_as('id_rfn','Región/Filial/Negocio');
-                            $crud->display_as('id_division','Sub-División 1');
-                            $crud->display_as('id_distrito','Sub-División 2');
-                            $crud->display_as('id_tipo','Tipo de Evento');
-                            $crud->display_as('descripcion_evento','Descripción del Evento');
-                            $crud->display_as('accion_realizada','Acción Realizada');
-                            $crud->display_as('impacto_operacional','Impacto Operacional');
-                            $crud->display_as('descripcion_impacto','Descripción del Impacto Operacional');
-                            $crud->display_as('fecha_evento','Fecha del Evento');
-                            $crud->display_as('file_url','Adjuntar archivo gif | jpeg | jpg | png');
-                            $crud->display_as('aprobacion_nacional','Aprobación');
-                        }
-
-                        $crud->callback_before_insert($this->logs($accion='evento-insert'));
-                        $crud->callback_before_update($this->logs($accion='evento-update'));
-                        $crud->callback_before_delete($this->logs($accion='evento-delete'));
-
-                        
-			//$crud->columns('city','country','phone','addressLine1','postalCode');
-
-			$output = $crud->render();
-
-			$this->_example_output($output);
-
-		}catch(Exception $e){
-			show_error($e->getMessage().' --- '.$e->getTraceAsString());
-		}
-	}
+        
         public function logros()
 	{
 		try{
@@ -348,10 +306,13 @@ class Guardiapcp extends CI_Controller {
 	try{
 
 	$crud = new Grocery_CRUD_Multiuploader(); 
-	//$this->db = $this->load->database("guardia_pcp",true);
-	$crud->set_table('eventos_3');
+
+        $id_rol = $this->session->userdata('id_rol');
+        $indicador_usuario = $this->session->userdata('indicador_usuario');
+        $crud->set_table('eventos_4');
 	$crud->set_subject('Evento Relevante');
 
+        
         $crud->set_relation('id_rfn','rfn','descripcion_rfn');
         $crud->set_relation('id_division','division','descripcion_division'); 	 
         $crud->set_relation('id_distrito','distrito','descripcion_distrito'); 
@@ -360,17 +321,16 @@ class Guardiapcp extends CI_Controller {
         $crud->set_relation('id_evento','imagenes_eventos','url');
         //$crud->field_type('indicador_usuario','invisible');
         $crud->required_fields('id_rfn','id_division','id_desviacion','id_tipo','descripcion_evento','accion_realizada', 'impacto_mediatico', 'impacto_operacional','fecha_evento');
-        $id_rol = $this->session->userdata('id_rol');
-        //$indicador_usuario = $this->session->userdata('indicador_usuario');
+
         $crud->field_type('impacto_operacional', 'true_false', array('No', 'Si'));
         $crud->field_type('impacto_mediatico', 'true_false', array('No', 'Si'));
         $crud->field_type('aprobacion_regional', 'true_false', array('No', 'Si'));
         $crud->field_type('aprobacion_nacional', 'true_false', array('No', 'Si'));
         
-        //if($id_rol==3){
-            $col = array('fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file');	
-            $crud->fields($col);
-            $crud->columns($col);
+            $columns = array('fecha_evento','fecha_registro','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file');	
+            $fields = array('fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file');	
+            $crud->fields($fields);
+            $crud->columns($columns);
             
             $crud->unset_fields('indicador_regional','indicador_nacional','aprobacion_nacional','aprobacion_regional');
             $crud->unset_fields('indicador_regional','indicador_nacional','aprobacion_nacional','aprobacion_regional');
@@ -383,7 +343,7 @@ class Guardiapcp extends CI_Controller {
             $crud->display_as('accion_realizada','Acción Realizada PCP');
             $crud->display_as('impacto_operacional','Impacto Operacional');
             $crud->display_as('impacto_mediatico','Impacto Mediático');
-            $crud->display_as('descripcion_impacto','Descripción del Impacto Operacional');
+            $crud->display_as('descripcion_impacto','Descripción del Impacto');
             $crud->display_as('fecha_evento','Fecha del Evento');
             $crud->display_as('aprobacion_nacional','Aprobación Nacional');
             $crud->display_as('aprobacion_regional','Aprobación Regional');
@@ -391,16 +351,52 @@ class Guardiapcp extends CI_Controller {
             $crud->display_as('indicador_usuario','Indicador de Reportador');
             $crud->display_as('indicador_regional','Indicador de Aprobador Regional');
             $crud->display_as('indicador_nacional','Indicador de Aprobrador Nacional');
-            //$crud->display_as('my_pictures','Evidencias');
-        //}
+            
+            //$crud->add_action('Editar', 'http://www.grocerycrud.com/assets/uploads/general/smiley.png', '','',array($this,'validate_action'));
+            
+            $crud->unset_export();
+//            
+//            $crud->unset_add();
+//            $crud->unset_edit();
+//            $crud->unset_delete();
+//            
+            $crud->callback_column('fecha_registro',array($this,'validate_action_edit'));
+            
+            /*if($crud->callback_column('fecha_registro',array($this,'validate_action_edit'))==true){
+                echo 1;die();
+            }else{
+                echo 2;die();
+            }*/
+            $crud->order_by('fecha_registro','desc');
+            
+                    
+            if($id_rol==1){
+            //$crud->unset_operations();
+            $crud->where('`eventos_4`.indicador_usuario',$indicador_usuario);
+            /*
+            $crud->unset_add();
+            $crud->unset_edit();
+            $crud->unset_delete();
+            */                             
+            }
+            if($id_rol==2){
+            $crud->unset_delete();
+            $crud->where('`eventos_4`.indicador_usuario',$indicador_usuario);
+            }
+            if($id_rol==3){
+            $crud->unset_delete();
+            
+            }
+            
 
+            
 	$config = array(
 
 		/* Destination directory */
 		"path_to_directory"       =>'assets/grocery_crud_multiuploader/GC_uploads/pictures/',
 
 		/* Allowed upload type */
-		"allowed_types"           =>'gif|jpeg|jpg|png|pdf',
+		"allowed_types"           =>'gif|jpeg|jpg|png',
 
 		/* Show allowed file types while editing ? */
 		"show_allowed_types"      => true,
@@ -428,6 +424,8 @@ class Guardiapcp extends CI_Controller {
         $crud->callback_edit_field('id_tipo', array($this, 'empty_desviacion_evento_dropdown_select'));
 
         $output = $crud->render();
+        
+        //print_r($output);die();
                         			
 			//DEPENDENT DROPDOWN SETUP
 			$dd_data = array(
@@ -468,6 +466,20 @@ class Guardiapcp extends CI_Controller {
 	}		
 
     }
+    public function revisar_fecha($value, $row)
+{
+  
+  $date = date('d/m/Y').' 07:30:00';
+  if($row->fecha_registro < $date){
+  //$crud->unset_delete();
+      return "<a href='".site_url('admin/sub_webpages/'.$row->id_evento)."'>$value - $row->fecha_registro</a>";
+      
+  }else{
+      //$crud->unset_edit();
+      return "<a href='".site_url('admin/sub_webpages/'.$row->id_evento)."'>$date - $row->fecha_registro***</a>";
+  }
+      
+}
     
     /**/
     //CALLBACK FUNCTIONS
@@ -487,7 +499,7 @@ class Guardiapcp extends CI_Controller {
 		if(isset($listingID) && $state == "edit") {
 			//GET THE STORED STATE ID
 			$this->db->select('id_desviacion, id_tipo')
-					 ->from('eventos_3')
+					 ->from('eventos_4')
 					 ->where('id_evento', $listingID);
 			$db = $this->db->get();
 			$row = $db->row(0);
@@ -553,7 +565,7 @@ class Guardiapcp extends CI_Controller {
 		if(isset($listingID) && $state == "edit") {
 			//GET THE STORED STATE ID
 			$this->db->select('id_rfn, id_division')
-					 ->from('eventos_3')
+					 ->from('eventos_4')
 					 ->where('id_evento', $listingID);
 			$db = $this->db->get();
 			$row = $db->row(0);
@@ -598,7 +610,7 @@ class Guardiapcp extends CI_Controller {
 		if(isset($listingID) && $state == "edit") {
 			//GET THE STORED STATE ID
 			$this->db->select('id_division, id_distrito')
-					 ->from('eventos_3')
+					 ->from('eventos_4')
 					 ->where('id_evento', $listingID);
 			$db = $this->db->get();
 			$row = $db->row(0);
