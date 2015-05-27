@@ -199,6 +199,30 @@ class Guardiapcp extends CI_Controller {
 			show_error($e->getMessage().' --- '.$e->getTraceAsString());
 		}
         }
+        public function hora_tope()
+	{
+		try{
+			$crud = new grocery_CRUD();
+
+			//$crud->set_theme('datatables');
+			$crud->set_table('hora_tope');
+			$crud->set_subject('Configuración de Hora Tope');
+                        $crud->unset_export();
+                        $crud->unset_add();
+                        $crud->unset_delete();
+                        $crud->unset_print();
+                        $crud->unset_read();
+
+                        $crud->field_type('hora_tope', 'datetime');
+                        
+			$output = $crud->render();
+
+			$this->_example_output($output);
+
+		}catch(Exception $e){
+			show_error($e->getMessage().' --- '.$e->getTraceAsString());
+		}
+        }
         public function logros()
 	{
 		try{
@@ -252,18 +276,50 @@ class Guardiapcp extends CI_Controller {
         }
         public function validate_action_edit($value, $row)
         {
+            //Set Horal Fin
+            $h = "07";
+            
+            //Set Fecha Actual
+            $fecha_actual = date('Y-m-d H:m:s');
+            
             //Set Fecha de Hoy Condición 1
             $fecha_hoy = date('Y-m-d');
+            $fecha_hoy = strtotime ( '-1 day' , strtotime ( $fecha_hoy ) ) ;
+            $fecha_inicio = date ( 'Y-m-j' , $fecha_hoy )." 07:30:00";
             
             //Set Fecha Tope
-            $fecha = date('Y-m-j');
-            $fecha_tope = strtotime ( '+1 day' , strtotime ( $fecha ) ) ;
-            $fecha_tope = date ( 'Y-m-j' , $fecha_tope )." 07:30:00";
-
-        if($row->fecha_registro >= $fecha_hoy && $row->fecha_registro<=$fecha_tope){
-            return "<a title='Disponible para EDITAR Hasta: ".$fecha_tope."' href='".site_url('guardiapcp/er/edit').'/'.$row->id_evento."'><b>".$row->fecha_registro."</b></a>";
+            $fecha = explode(" ", $row->fecha_registro);
+            $fecha = explode("-", $fecha[0]);
+            $fecha = "$fecha[2]-$fecha[1]-$fecha[0]";            
+            $fecha_fin = strtotime ( '+1 day' , strtotime ( $fecha ) ) ;
+            $fecha_fin_title = strtotime ( '+1 day' , strtotime ( $fecha ) ) ;
+            $fecha_fin = date ( 'Y-m-j' , $fecha_fin )." $h:30:00";
+            $fecha_fin_title = date ( 'd/m/Y' , $fecha_fin_title )." $h:30:00";
+            
+            
+            //VALIDANDO CONDICIONES
+            $cod_1 = "";
+            $cod_2 = "";
+            if($fecha_inicio <= $row->fecha_registro){
+                $cod_1 .= "$fecha_inicio <= $row->fecha_registro = TRUE</br></br>";
+            }else{
+                $cod_1 .= "$fecha_inicio <= $row->fecha_registro = FALSE</br></br>";
+            }
+            //******************************************************************
+            if($fecha_actual<=$fecha_fin){
+                $cod_2 .= "$fecha_actual<=$fecha_fin = TRUE</br></br>";
+            }else{
+                $cod_2 .= "$fecha_actual<=$fecha_fin = FALSE</br></br>";
+            }
+            
+            
+            
+            //echo $cod_1.$cod_2;
+        if($fecha_inicio <= $row->fecha_registro && $fecha_actual<=$fecha_fin){
+            
+            return "<a title='Disponible para EDITAR Hasta: ".$fecha_fin_title."' href='".site_url('guardiapcp/er/edit').'/'.$row->id_evento."'><img src='".site_url('/images/edit.png')."'/> ".$row->fecha_registro."</a>";
         }else{
-            return $row->fecha_registro;
+            return "<img title='Venció la opción de EDITAR en fecha: ".$fecha_fin_title."'src='".site_url('/images/error.png')."'/> ".$row->fecha_registro;
         }
 
         }
@@ -297,8 +353,9 @@ class Guardiapcp extends CI_Controller {
         $crud->field_type('impacto_mediatico', 'true_false', array('No', 'Si'));
         $crud->field_type('aprobacion_regional', 'true_false', array('No', 'Si'));
         $crud->field_type('aprobacion_nacional', 'true_false', array('No', 'Si'));
+        //$crud->field_type('descripcion_impacto', 'hidden');
         
-            $columns = array('fecha_evento','fecha_registro','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file');	
+            $columns = array('fecha_registro','fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file');	
             $fields = array('fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file');	
             $crud->fields($fields);
             $crud->columns($columns);
@@ -316,6 +373,7 @@ class Guardiapcp extends CI_Controller {
             $crud->display_as('impacto_mediatico','Impacto Mediático');
             $crud->display_as('descripcion_impacto','Descripción del Impacto');
             $crud->display_as('fecha_evento','Fecha del Evento');
+            $crud->display_as('fecha_registro','Fecha de Registro');
             $crud->display_as('aprobacion_nacional','Aprobación Nacional');
             $crud->display_as('aprobacion_regional','Aprobación Regional');
             $crud->display_as('file','Evidencias');
@@ -327,19 +385,24 @@ class Guardiapcp extends CI_Controller {
             $crud->callback_column('fecha_registro',array($this,'validate_action_edit'));
             
             $crud->order_by('fecha_registro','desc');
-                    
+            
+            $hide_edit = "";
+            $hide_delete = "";
+            
             if($id_rol==1){
                 $crud->where('`eventos_4`.indicador_usuario',$indicador_usuario);
+                $hide_edit = "$('.edit-icon').hide();";
+                //$hide_delete = "$('.delete-icon').hide();";
             }
             if($id_rol==2){
+                $crud->unset_edit();
                 $crud->unset_delete();
                 $crud->where('`eventos_4`.indicador_usuario',$indicador_usuario);
             }
             if($id_rol==3){
-                $crud->unset_delete();
+                $hide_edit = "$('.edit-icon').hide();";
+                $hide_delete = "$('.delete-icon').hide();";
             }
-            
-
             
 	$config = array(
 
@@ -373,6 +436,7 @@ class Guardiapcp extends CI_Controller {
         
         $crud->callback_add_field('id_tipo', array($this, 'empty_desviacion_evento_dropdown_select'));
         $crud->callback_edit_field('id_tipo', array($this, 'empty_desviacion_evento_dropdown_select'));
+
 
         $output = $crud->render();
         
@@ -408,10 +472,14 @@ class Guardiapcp extends CI_Controller {
 				'dd_ajax_loader' => base_url().'ajax-loader.gif'
 			);
 			$output->dropdown_setup_desviacion = $dd_data_desviacion;
+                        
+                        
+                        
                         $output->hide_action = "<script type='text/javascript'>
                         $(function() {
                         function hide_action(){
-                            $('.edit-icon').hide();
+                            $hide_edit
+                            $hide_delete
                         }
                             setInterval(hide_action, 50);
                         });
@@ -427,20 +495,7 @@ class Guardiapcp extends CI_Controller {
 	}		
 
     }
-    public function revisar_fecha($value, $row)
-{
-  
-  $date = date('d/m/Y').' 07:30:00';
-  if($row->fecha_registro < $date){
-  //$crud->unset_delete();
-      return "<a href='".site_url('admin/sub_webpages/'.$row->id_evento)."'>$value - $row->fecha_registro</a>";
-      
-  }else{
-      //$crud->unset_edit();
-      return "<a href='".site_url('admin/sub_webpages/'.$row->id_evento)."'>$date - $row->fecha_registro***</a>";
-  }
-      
-}
+
     
     /**/
     //CALLBACK FUNCTIONS
