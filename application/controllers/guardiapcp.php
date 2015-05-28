@@ -347,16 +347,17 @@ class Guardiapcp extends CI_Controller {
         $crud->set_relation('id_desviacion','desviacion','nombre_desviacion '); 
         $crud->set_relation('id_evento','imagenes_eventos','url');
         //$crud->field_type('indicador_usuario','invisible');
-        $crud->required_fields('id_rfn','id_division','id_desviacion','id_tipo','descripcion_evento','accion_realizada', 'impacto_mediatico', 'impacto_operacional','fecha_evento');
+        $crud->required_fields('id_rfn','id_division','id_desviacion','id_tipo','descripcion_evento','accion_realizada', 'impacto_mediatico', 'impacto_operacional','descripcion_impacto','fecha_evento');
 
         $crud->field_type('impacto_operacional', 'true_false', array('No', 'Si'));
         $crud->field_type('impacto_mediatico', 'true_false', array('No', 'Si'));
         $crud->field_type('aprobacion_regional', 'true_false', array('No', 'Si'));
         $crud->field_type('aprobacion_nacional', 'true_false', array('No', 'Si'));
+        $crud->field_type('completado', 'true_false', array('No', 'Si'));
         //$crud->field_type('descripcion_impacto', 'hidden');
         
-            $columns = array('fecha_registro','fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file');	
-            $fields = array('fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file');	
+            $columns = array('fecha_registro','fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file','completado');	
+            $fields = array('fecha_evento','id_rfn','id_division','id_distrito','id_desviacion','id_tipo','descripcion_evento','impacto_mediatico', 'impacto_operacional','descripcion_impacto', 'accion_realizada', 'indicador_usuario', 'file','completado');	
             $crud->fields($fields);
             $crud->columns($columns);
             
@@ -365,8 +366,8 @@ class Guardiapcp extends CI_Controller {
             $crud->display_as('id_rfn','Negocio/Filial');
             $crud->display_as('id_division','Sub-División 1');
             $crud->display_as('id_distrito','Sub-División 2');
-            $crud->display_as('id_desviacion','Desviación');
-            $crud->display_as('id_tipo','Tipo de Desviación');
+            $crud->display_as('id_desviacion','Evento');
+            $crud->display_as('id_tipo','Tipo de Evento');
             $crud->display_as('descripcion_evento','Descripción del Evento');
             $crud->display_as('accion_realizada','Acción Realizada PCP');
             $crud->display_as('impacto_operacional','Impacto Operacional');
@@ -380,6 +381,7 @@ class Guardiapcp extends CI_Controller {
             $crud->display_as('indicador_usuario','Indicador de Reportador');
             $crud->display_as('indicador_regional','Indicador de Aprobador Regional');
             $crud->display_as('indicador_nacional','Indicador de Aprobrador Nacional');
+            $crud->display_as('completado','¿Registro Completo?');
             
             $crud->unset_export();
             $crud->callback_column('fecha_registro',array($this,'validate_action_edit'));
